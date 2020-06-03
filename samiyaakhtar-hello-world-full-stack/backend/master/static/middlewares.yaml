@@ -1,0 +1,20 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: backend-master
+spec:
+  stripPrefix:
+    forceSlash: false
+    prefixes:
+      - /backend
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: backend
+spec:
+  stripPrefix:
+    forceSlash: false
+    prefixes:
+      - /backend
