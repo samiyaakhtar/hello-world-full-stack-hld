@@ -1,0 +1,11 @@
+name: hello-world-full-stack
+type: component
+subcomponents:
+  - name: backend
+    type: component
+    method: local
+    path: ./backend
+  - name: frontend
+    type: component
+    method: local
+    path: ./frontend
