@@ -3,5 +3,5 @@ subcomponents:
     config:
       image:
         repository: hellorings.azurecr.io/samiyaakhtar/hello-world-full-stack-frontend
-        tag: master-20200603.5
+        tag: master-20200603.6
       serviceName: frontend-master
