@@ -1,7 +1,4 @@
 subcomponents:
   chart:
     config:
-      image:
-        repository: hellorings.azurecr.io/samiyaakhtar/hello-world-full-stack-frontend
-        tag: master-20200603.5
       serviceName: frontend-master

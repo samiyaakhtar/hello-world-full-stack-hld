@@ -5,7 +5,7 @@ subcomponents:
   type: helm
   source: https://github.com/samiyaakhtar/hello-world-full-stack
   method: git
-  path: chart
+  path: api/chart
   branch: master
 - name: static
   type: static

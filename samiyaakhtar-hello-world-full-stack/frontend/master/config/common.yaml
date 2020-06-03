@@ -1,4 +1,0 @@
-subcomponents:
-  chart:
-    config:
-      serviceName: frontend-master
