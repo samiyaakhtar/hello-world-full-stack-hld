@@ -1,0 +1,6 @@
+name: frontend
+subcomponents:
+- name: master
+  type: component
+  method: local
+  path: ./master

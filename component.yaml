@@ -1,11 +1,15 @@
 name: default-component
 type: component
 subcomponents:
-  - name: hello-world-full-stack
-    type: component
-    method: local
-    path: ./samiyaakhtar/hello-world-full-stack
-  - name: traefik2
-    source: https://github.com/microsoft/fabrikate-definitions.git
-    method: git
-    path: definitions/traefik2
+- name: hello-world-full-stack
+  type: component
+  method: local
+  path: ./samiyaakhtar/hello-world-full-stack
+- name: samiyaakhtar-hello-world-full-stack
+  type: component
+  method: local
+  path: ./samiyaakhtar-hello-world-full-stack
+- name: traefik2
+  source: https://github.com/microsoft/fabrikate-definitions.git
+  method: git
+  path: definitions/traefik2
