@@ -1,0 +1,89 @@
+name: manifest generation
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - "**.md"
+  pull_request:
+    branches: [master]
+
+env:
+  INTROSPECTION_ACCOUNT_KEY: ${{ secrets.INTROSPECTION_ACCOUNT_KEY }}
+  ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN }}
+  REPO: https://github.com/samiyaakhtar/hello-world-full-stack-manifest
+  INTROSPECTION_ACCOUNT_NAME: abrigspksetup
+  INTROSPECTION_PARTITION_KEY: samiya-github-actions-prototype
+  INTROSPECTION_TABLE_NAME: spektatetable
+  COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug Env Vars
+        run: |
+          echo "GITHUB_RUN_ID: $GITHUB_RUN_ID"
+          echo "GITHUB_RUN_NUMBER: $GITHUB_RUN_NUMBER"
+          echo "GITHUB_ACTOR: $GITHUB_ACTOR"
+          echo "GITHUB_WORKFLOW: $GITHUB_WORKFLOW"
+          echo "GITHUB_REF: $GITHUB_REF"
+          echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
+          echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
+          echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
+
+      - uses: actions/checkout@v2
+      - uses: azure/setup-helm@v1
+        with:
+          version: "2.16.3" # default is latest stable
+        id: install
+      - name: Get and Set Job Run Id
+        run: |
+          result=$(curl -s -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs)
+          echo $result
+          job_name=Build
+          job_run_id=$(echo "$result"  | jq -r --arg job_name "$job_name" '.jobs[] | select(.name == $job_name) | .id')
+          echo "job_run_id: $job_run_id"
+          echo "::set-env name=JOB_RUN_ID::$job_run_id"
+      - name: Update manifest pipeline details in Spektate
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "test"
+
+          set -e
+          chmod +x ./bedrock_helpers.sh
+          . ./bedrock_helpers.sh --source-only
+          get_bedrock_version
+          download_bedrock
+
+          commitId=$GITHUB_SHA
+          commitId=$(echo "${commitId:0:7}")
+
+          message="$COMMIT_MESSAGE"
+
+          if [[ $message == *"Merge"* ]]; then
+          pr_id=$(echo $message | grep -oE '[0-9]+' | head -1 | sed -e 's/^0\\+//')
+          echo "./bedrock/bedrock deployment create -n $INTROSPECTION_ACCOUNT_NAME -k $INTROSPECTION_ACCOUNT_KEY -t $INTROSPECTION_TABLE_NAME -p $INTROSPECTION_PARTITION_KEY --p3 $JOB_RUN_ID --hld-commit-id $commitId --pr $pr_id"
+          ./bedrock/bedrock deployment create -n $INTROSPECTION_ACCOUNT_NAME -k $INTROSPECTION_ACCOUNT_KEY -t $INTROSPECTION_TABLE_NAME -p $INTROSPECTION_PARTITION_KEY --p3 $JOB_RUN_ID --hld-commit-id $commitId --pr $pr_id
+          else
+          echo "./bedrock/bedrock deployment create -n $INTROSPECTION_ACCOUNT_NAME -k $INTROSPECTION_ACCOUNT_KEY -t $INTROSPECTION_TABLE_NAME -p $INTROSPECTION_PARTITION_KEY --p3 $JOB_RUN_ID --hld-commit-id $commitId"
+          ./bedrock/bedrock deployment create -n $INTROSPECTION_ACCOUNT_NAME -k $INTROSPECTION_ACCOUNT_KEY -t $INTROSPECTION_TABLE_NAME -p $INTROSPECTION_PARTITION_KEY --p3 $JOB_RUN_ID --hld-commit-id $commitId
+          fi
+      # insert the transform step here
+      - name: Update manifest pipeline details in CJ db
+        if: github.event_name != 'pull_request'
+        run: |
+          set -e
+
+          chmod +x ./bedrock_helpers.sh
+          . ./bedrock_helpers.sh --source-only
+
+          cd "$HOME"/${MANIFEST_REPO##*/}
+          get_bedrock_version
+          download_bedrock
+
+          latest_commit=$(git rev-parse --short HEAD)
+          url=$(git remote --verbose | grep origin | grep fetch | cut -f2 | cut -d' ' -f1)
+          repourl=${url##*@}
+
+          ./bedrock/bedrock deployment create -n $INTROSPECTION_ACCOUNT_NAME -k $INTROSPECTION_ACCOUNT_KEY -t $INTROSPECTION_TABLE_NAME -p $INTROSPECTION_PARTITION_KEY --p3 $JOB_RUN_ID --manifest-commit-id $latest_commit --repository $repourl
