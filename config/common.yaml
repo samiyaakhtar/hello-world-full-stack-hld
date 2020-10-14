@@ -3,6 +3,11 @@ subcomponents:
     config:
       image:
         repository: andrebriggs.azurecr.io/samiyaakhtar/hello-world-full-stack-backend
+        tag: "20201014.7"
+  frontend:
+    config:
+      image:
+        repository: andrebriggs.azurecr.io/samiyaakhtar/hello-world-full-stack-frontend
         tag: "20201014.6"
   frontend:
     config:
