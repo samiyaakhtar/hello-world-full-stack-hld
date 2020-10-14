@@ -82,7 +82,7 @@ jobs:
           echo "Downloading build.sh..."
           set -e
           # Download build.sh
-          curl $BEDROCK_BUILD_SCRIPT > build.sh
+          curl -L $BEDROCK_BUILD_SCRIPT > build.sh
           chmod +x ./build.sh
 
       - name: Generate manifests
