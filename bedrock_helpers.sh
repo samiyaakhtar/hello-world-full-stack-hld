@@ -64,7 +64,7 @@ function download_bedrock() {
     else
         echo "There was an error when downloading Bedrock CLI. Please check version number and try again."
     fi
-    wget "https://github.com/microsoft/bedrock-cli/releases/download/$CLI_VERSION_TO_DOWNLOAD/bedrock-$os"
+    wget "https://github.com/microsoft/bedrock-cli/releases/download/$CLI_VERSION_TO_DOWNLOAD/bedrock-$os" -q
     mkdir bedrock
     mv bedrock-$os bedrock/bedrock
     chmod +x bedrock/bedrock 

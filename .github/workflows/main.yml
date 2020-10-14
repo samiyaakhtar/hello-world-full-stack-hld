@@ -100,7 +100,7 @@ jobs:
           chmod +x ./bedrock_helpers.sh
           . ./bedrock_helpers.sh --source-only
 
-          cd "$HOME"/${MANIFEST_REPO##*/}
+          cd "$HOME"/${REPO##*/}
           get_bedrock_version
           download_bedrock
 
