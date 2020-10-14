@@ -15,6 +15,8 @@ env:
   INTROSPECTION_PARTITION_KEY: samiya-github-actions-prototype
   INTROSPECTION_TABLE_NAME: spektatetable
   COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+  BEDROCK_BUILD_SCRIPT: https://github.com/microsoft/bedrock/raw/master/gitops/azure-devops/build.sh
+  BRANCH_NAME: ${{ ${GITHUB_REF##*/} }}
 
 jobs:
   build:
@@ -69,7 +71,23 @@ jobs:
           echo "./bedrock/bedrock deployment create -n $INTROSPECTION_ACCOUNT_NAME -k $INTROSPECTION_ACCOUNT_KEY -t $INTROSPECTION_TABLE_NAME -p $INTROSPECTION_PARTITION_KEY --p3 $JOB_RUN_ID --hld-commit-id $commitId"
           ./bedrock/bedrock deployment create -n $INTROSPECTION_ACCOUNT_NAME -k $INTROSPECTION_ACCOUNT_KEY -t $INTROSPECTION_TABLE_NAME -p $INTROSPECTION_PARTITION_KEY --p3 $JOB_RUN_ID --hld-commit-id $commitId
           fi
-      # insert the transform step here
+
+      - name: Download build.sh
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "Downloading build.sh..."
+          set -e
+          # Download build.sh
+          curl $BEDROCK_BUILD_SCRIPT > build.sh
+          chmod +x ./build.sh
+
+      - name: Generate manifests
+        if: github.event_name != 'pull_request'
+        run: |
+          set -e
+          echo "Transform"
+          ./build.sh
+
       - name: Update manifest pipeline details in CJ db
         if: github.event_name != 'pull_request'
         run: |
