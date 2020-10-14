@@ -1,0 +1,6 @@
+subcomponents:
+  backend:
+    config:
+      image:
+        repository: andrebriggs.azurecr.io/samiyaakhtar/hello-world-full-stack
+        tag: "20201014.5"
